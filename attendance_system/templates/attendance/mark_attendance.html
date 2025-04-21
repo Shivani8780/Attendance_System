@@ -1,0 +1,21 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+<div class="container" style="background-color: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+    <h2 class="text-center" style="color: #28a745;">Mark Attendance for {{ user.username }}</h2>
+    <form method="post" class="text-center">
+        {% csrf_token %}
+        <div class="mb-3">
+            {% if record.check_in_time and not record.check_out_time %}
+                <p class="lead" style="color: #212529;">You have checked in at <strong>{{ record.check_in_time }}</strong>.</p>
+                <button type="submit" name="action" value="check_out" class="btn btn-danger btn-lg">Check Out</button>
+            {% elif record.check_out_time %}
+                <p class="lead" style="color: #212529;">You checked in at <strong>{{ record.check_in_time }}</strong> and checked out at <strong>{{ record.check_out_time }}</strong>.</p>
+            {% else %}
+                <button type="submit" name="action" value="check_in" class="btn btn-success btn-lg">Check In</button>
+                <button type="submit" name="action" value="check_out" class="btn btn-danger btn-lg">Check Out</button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock %}

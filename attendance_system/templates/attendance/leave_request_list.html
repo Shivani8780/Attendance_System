@@ -1,0 +1,42 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+<h2>Your Leave Requests</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Leave Type</th>
+            <th>Duration</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Reason</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for leave in leave_requests %}
+        <tr>
+            <td>{{ leave.leave_type }}</td>
+            <td>{{ leave.duration }} days</td>
+            <td>{{ leave.start_date }}</td>
+            <td>{{ leave.end_date }}</td>
+            <td>{{ leave.status }}</td>
+            <td>{{ leave.reason|default:"-" }}</td>
+            <td>
+                {% if leave.status == 'Pending' %}
+                <a href="{% url 'attendance:leave_request_cancel' leave.pk %}" class="btn btn-danger btn-sm">Cancel</a>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No leave requests found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p><a href="{% url 'attendance:leave_request_create' %}" class="btn btn-primary">Apply for Leave</a></p>
+{% endblock %}

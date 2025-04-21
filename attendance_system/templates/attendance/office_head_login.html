@@ -1,0 +1,62 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="card" style="width: 400px;">
+        <div class="card-body">
+            <h2 class="card-title text-center">Office Head Login</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+            <p class="mt-3 text-center">Don't have an account? <a href="{% url 'attendance:register' %}">Register here</a>.</p>
+            <p class="text-center"><a href="{% url 'attendance:password_reset' %}">Forgot Password?</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="loginPopup" tabindex="-1" aria-labelledby="loginPopupLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="loginPopupLabel">Notification</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalMessage"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var loginPopup = new bootstrap.Modal(document.getElementById('loginPopup'));
+    var modalMessage = document.getElementById('modalMessage');
+  });
+</script>
+
+{% if error %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var loginPopup = new bootstrap.Modal(document.getElementById('loginPopup'));
+    var modalMessage = document.getElementById('modalMessage');
+    modalMessage.innerHTML = '<div class="alert alert-danger">{{ error }}</div>';
+    loginPopup.show();
+  });
+</script>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,60 @@
+/* Background image of office meeting */
+body {
+    background: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    color: #f8f9fa;
+}
+
+/* Dark navbar styling */
+.navbar-dark.bg-primary {
+    background-color: #001838 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Navbar link text lighter */
+.navbar-dark .navbar-nav .nav-link {
+    color: #fffbfb;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: #ffffff;
+}
+
+/* Login button color changed to green */
+.btn-login {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: #fff !important;
+}
+
+.btn-login:hover,
+.btn-login:focus {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+    color: #fff !important;
+}
+
+/* Transparent container with slight white transparency */
+.transparent-container {
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    text-align: inherit;
+    color: #212529;
+}
+
+/* Additional CSS fixes for compatibility */
+.text-align-match-parent {
+    text-align: match-parent;
+}
+
+/* Cache control and performance improvements should be handled at server config level */
+
+/* Security headers like 'secure' and 'httponly' for cookies should be configured in server or Django settings */
+
+/* Remove inline styles from templates and move them here */
