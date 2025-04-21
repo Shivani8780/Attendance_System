@@ -1,182 +1,237 @@
 {% extends 'attendance/base.html' %}
 
 {% block content %}
-<div class="container p-4 rounded" style="background-color: rgba(255, 255, 255, 0.85); color: #212529;">
-    <h1 class="text-center">Office Head Dashboard</h1>
+<div class="container p-4 rounded" style="background-color: rgba(255, 255, 255, 0.95); color: #212529;">
+    <h1 class="text-center mb-4" style="color: #02103f;">Office Head Dashboard</h1>
 
     <!-- Export Data Button -->
-    <form method="get" action="{% url 'attendance:export_office_head_data' %}" style="margin-bottom: 20px;">
-        <button type="submit" class="btn btn-primary">Export All Data as Excel Workbook</button>
+    <form method="get" action="{% url 'attendance:export_office_head_data' %}" class="mb-4 text-center">
+        <button type="submit" class="btn btn-primary btn-lg">Export All Data as Excel Workbook</button>
     </form>
 
-    <h2 style="color: #02103f;">Leave Requests</h2>
-    <table class="table table-dark table-striped">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Leave Type</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for leave in leave_requests %}
-            <tr>
-                <td>{{ leave.user.username }}</td>
-                <td>{{ leave.leave_type }}</td>
-                <td>{{ leave.start_date }}</td>
-                <td>{{ leave.end_date }}</td>
-                <td>{{ leave.status }}</td>
-                <td>
-                    {% if leave.status == 'Pending' %}
-                    <form method="post" action="{% url 'attendance:approve_leave' leave.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                    </form>
-                    <form method="post" action="{% url 'attendance:reject_leave' leave.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                    </form>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs justify-content-center mb-4" id="dashboardTabs" role="tablist" style="border-bottom: 3px solid #02103f;">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="leave-requests-tab" data-bs-toggle="tab" data-bs-target="#leave-requests" type="button" role="tab" aria-controls="leave-requests" aria-selected="true" style="color: #02103f; font-weight: 600;">Leave Requests</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="attendance-records-tab" data-bs-toggle="tab" data-bs-target="#attendance-records" type="button" role="tab" aria-controls="attendance-records" aria-selected="false" style="color: #02103f; font-weight: 600;">Attendance Records</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="weekly-day-off-tab" data-bs-toggle="tab" data-bs-target="#weekly-day-off" type="button" role="tab" aria-controls="weekly-day-off" aria-selected="false" style="color: #02103f; font-weight: 600;">Weekly Day Off Report</button>
+        </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content" id="dashboardTabsContent">
+        <!-- Leave Requests Tab -->
+        <div class="tab-pane fade show active" id="leave-requests" role="tabpanel" aria-labelledby="leave-requests-tab">
+            <table class="table table-dark table-striped table-hover shadow-sm rounded">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>User</th>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in leave_requests %}
+                    <tr>
+                        <td>{{ leave.user.username }}</td>
+                        <td>{{ leave.leave_type }}</td>
+                        <td>{{ leave.start_date }}</td>
+                        <td>{{ leave.end_date }}</td>
+                        <td>{{ leave.status }}</td>
+                        <td>
+                            {% if leave.status == 'Pending' %}
+                            <form method="post" action="{% url 'attendance:approve_leave' leave.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                            <form method="post" action="{% url 'attendance:reject_leave' leave.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No leave requests found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination controls for Leave Requests -->
+            <nav aria-label="Leave Requests Pagination" class="d-flex justify-content-center">
+                <ul class="pagination">
+                    {% if leave_requests.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?leave_page={{ leave_requests.previous_page_number }}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Previous</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
                     {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6">No leave requests found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    {% for num in leave_requests.paginator.page_range %}
+                    {% if leave_requests.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?leave_page={{ num }}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if leave_requests.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?leave_page={{ leave_requests.next_page_number }}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Next</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
 
-    <h2 style="color: #02103f;">Attendance Records</h2>
-    <table class="table table-dark table-striped">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Date</th>
-                <th>Check In</th>
-                <th>Check Out</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in attendance_records %}
-            <tr>
-                <td>{{ record.user.username }}</td>
-                <td>{{ record.date }}</td>
-                <td>{{ record.check_in_time }}</td>
-                <td>{{ record.check_out_time }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No attendance records found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <!-- Attendance Records Tab -->
+        <div class="tab-pane fade" id="attendance-records" role="tabpanel" aria-labelledby="attendance-records-tab">
+            <table class="table table-dark table-striped table-hover shadow-sm rounded">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>User</th>
+                        <th>Date</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr>
+                        <td>{{ record.user.username }}</td>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.check_in_time }}</td>
+                        <td>{{ record.check_out_time }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No attendance records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-    <h2 style="color: #02103f;">Weekly Day Off Report</h2>
-    <table class="table table-dark table-striped">
-        <thead>
-            <tr>
-                <th>Employee</th>
-                <th>Weekly Day Off</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for wdo in weekly_day_offs %}
-            <tr>
-                <td>{{ wdo.user.username }}</td>
-                <td>{{ wdo.day_off }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="2">No weekly day off records found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <!-- Pagination controls for Attendance Records -->
+            <nav aria-label="Attendance Records Pagination" class="d-flex justify-content-center">
+                <ul class="pagination">
+                    {% if attendance_records.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?attendance_page={{ attendance_records.previous_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Previous</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+                    {% for num in attendance_records.paginator.page_range %}
+                    {% if attendance_records.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?attendance_page={{ num }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if attendance_records.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?attendance_page={{ attendance_records.next_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Next</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
 
-    <!-- Pagination controls for Leave Requests -->
-    <nav aria-label="Leave Requests Pagination">
-        <ul class="pagination justify-content-center">
-            {% if leave_requests.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?leave_page={{ leave_requests.previous_page_number }}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Previous</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
-            {% endif %}
-            {% for num in leave_requests.paginator.page_range %}
-            {% if leave_requests.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% else %}
-            <li class="page-item"><a class="page-link" href="?leave_page={{ num }}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">{{ num }}</a></li>
-            {% endif %}
-            {% endfor %}
-            {% if leave_requests.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?leave_page={{ leave_requests.next_page_number }}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Next</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Next</span></li>
-            {% endif %}
-        </ul>
-    </nav>
+        <!-- Weekly Day Off Report Tab -->
+        <div class="tab-pane fade" id="weekly-day-off" role="tabpanel" aria-labelledby="weekly-day-off-tab">
+            <table class="table table-dark table-striped table-hover shadow-sm rounded">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Weekly Day Off</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for wdo in weekly_day_offs %}
+                    <tr>
+                        <td>{{ wdo.user.username }}</td>
+                        <td>{{ wdo.day_off }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">No weekly day off records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-    <!-- Pagination controls for Attendance Records -->
-    <nav aria-label="Attendance Records Pagination">
-        <ul class="pagination justify-content-center">
-            {% if attendance_records.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?attendance_page={{ attendance_records.previous_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Previous</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
-            {% endif %}
-            {% for num in attendance_records.paginator.page_range %}
-            {% if attendance_records.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% else %}
-            <li class="page-item"><a class="page-link" href="?attendance_page={{ num }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">{{ num }}</a></li>
-            {% endif %}
-            {% endfor %}
-            {% if attendance_records.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?attendance_page={{ attendance_records.next_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if weekly_day_offs.number %}&weekly_day_off_page={{ weekly_day_offs.number }}{% endif %}">Next</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Next</span></li>
-            {% endif %}
-        </ul>
-    </nav>
-
-    <!-- Pagination controls for Weekly Day Offs -->
-    <nav aria-label="Weekly Day Off Pagination">
-        <ul class="pagination justify-content-center">
-            {% if weekly_day_offs.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?weekly_day_off_page={{ weekly_day_offs.previous_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}">Previous</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
-            {% endif %}
-            {% for num in weekly_day_offs.paginator.page_range %}
-            {% if weekly_day_offs.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% else %}
-            <li class="page-item"><a class="page-link" href="?weekly_day_off_page={{ num }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}">{{ num }}</a></li>
-            {% endif %}
-            {% endfor %}
-            {% if weekly_day_offs.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?weekly_day_off_page={{ weekly_day_offs.next_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}">Next</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Next</span></li>
-            {% endif %}
-        </ul>
-    </nav>
+            <!-- Pagination controls for Weekly Day Offs -->
+            <nav aria-label="Weekly Day Off Pagination" class="d-flex justify-content-center">
+                <ul class="pagination">
+                    {% if weekly_day_offs.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?weekly_day_off_page={{ weekly_day_offs.previous_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}">Previous</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+                    {% for num in weekly_day_offs.paginator.page_range %}
+                    {% if weekly_day_offs.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?weekly_day_off_page={{ num }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if weekly_day_offs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?weekly_day_off_page={{ weekly_day_offs.next_page_number }}{% if leave_requests.number %}&leave_page={{ leave_requests.number }}{% endif %}{% if attendance_records.number %}&attendance_page={{ attendance_records.number }}{% endif %}">Next</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
 </div>
+
+<script>
+    // Activate Bootstrap tabs
+    var triggerTabList = [].slice.call(document.querySelectorAll('#dashboardTabs button'))
+    triggerTabList.forEach(function (triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
+
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault()
+            tabTrigger.show()
+        })
+    })
+
+    // Preserve active tab on page reload using localStorage
+    document.addEventListener('DOMContentLoaded', function () {
+        var activeTab = localStorage.getItem('activeDashboardTab')
+        if (activeTab) {
+            var triggerEl = document.querySelector('#dashboardTabs button[data-bs-target="' + activeTab + '"]')
+            if (triggerEl) {
+                var tab = new bootstrap.Tab(triggerEl)
+                tab.show()
+            }
+        }
+    })
+
+    // Save active tab to localStorage on tab change
+    var tabButtons = document.querySelectorAll('#dashboardTabs button')
+    tabButtons.forEach(function (button) {
+        button.addEventListener('shown.bs.tab', function (event) {
+            localStorage.setItem('activeDashboardTab', event.target.getAttribute('data-bs-target'))
+        })
+    })
+</script>
 {% endblock %}
