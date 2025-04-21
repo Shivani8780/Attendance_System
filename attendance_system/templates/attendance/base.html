@@ -13,27 +13,30 @@
     <div class="d-flex align-items-center w-100">
       <a class="navbar-brand ms-3" href="{% url 'attendance:dashboard' %}">Attendance System</a>
       <ul class="navbar-nav d-flex flex-row ms-auto me-3">
-        {% if is_office_head %}
+        {% if user.is_authenticated %}
+          {% if is_office_head %}
+            <li class="nav-item me-3">
+              <a class="nav-link" href="{% url 'attendance:office_head_dashboard' %}">Office Head Dashboard</a>
+            </li>
+          {% else %}
+            <li class="nav-item me-3">
+              <a class="nav-link" href="{% url 'attendance:dashboard' %}">Dashboard</a>
+            </li>
+          {% endif %}
           <li class="nav-item me-3">
-            <a class="nav-link" href="{% url 'attendance:office_head_dashboard' %}">Dashboard</a>
+            <a class="nav-link" href="{% url 'attendance:mark_attendance' %}">Mark Attendance</a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link" href="{% url 'attendance:logout' %}">Logout</a>
           </li>
         {% else %}
           <li class="nav-item me-3">
-            <a class="nav-link" href="{% url 'attendance:dashboard' %}">Dashboard</a>
+            <a class="nav-link" href="{% url 'attendance:login' %}">Login</a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link" href="{% url 'attendance:register' %}">Register</a>
           </li>
         {% endif %}
-        <li class="nav-item me-3">
-          <a class="nav-link" href="{% url 'attendance:mark_attendance' %}">Mark Attendance</a>
-        </li>
-        <li class="nav-item me-3">
-          <a class="nav-link" href="{% url 'attendance:logout' %}">Logout</a>
-        </li>
-        <li class="nav-item me-3">
-          <a class="nav-link" href="{% url 'attendance:login' %}">Login</a>
-        </li>
-        <li class="nav-item me-3">
-          <a class="nav-link" href="{% url 'attendance:register' %}">Register</a>
-        </li>
       </ul>
     </div>
   </nav>

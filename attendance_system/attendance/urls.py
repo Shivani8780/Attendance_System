@@ -21,5 +21,6 @@ urlpatterns = [
     path('leave-request/cancel/<int:leave_id>/', views.leave_request_cancel, name='leave_request_cancel'),
     path('password-reset/', views.password_reset, name='password_reset'),
     path('export-attendance-records/', views.export_attendance_records, name='export_attendance_records'),
+    path('export-office-head-data/', views.export_office_head_data, name='export_office_head_data'),
     path('', lambda request: redirect('attendance:login'), name='root_redirect'),
 ]
